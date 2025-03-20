@@ -28,6 +28,7 @@ const AppointmentList = ({ appointments }) => {
               <th>Godzina</th>
               <th>Imię i Nazwisko Pacjenta</th>
               <th>Telefon</th>
+              <th>Notatka</th>
             </tr>
           </thead>
           <tbody>
@@ -36,6 +37,7 @@ const AppointmentList = ({ appointments }) => {
                 <td>{new Date(appointment.appointmentDateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
                 <td>{appointment.patientName}</td>
                 <td>{appointment.patientPhone}</td>
+                <td>{appointment.notes || '-'}</td>
               </tr>
             ))}
           </tbody>

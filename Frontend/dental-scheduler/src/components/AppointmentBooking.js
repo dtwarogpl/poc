@@ -9,6 +9,7 @@ const AppointmentBooking = () => {
   const [selectedTime, setSelectedTime] = useState(null);
   const [patientName, setPatientName] = useState('');
   const [patientPhone, setPatientPhone] = useState('');
+  const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
@@ -90,7 +91,8 @@ const AppointmentBooking = () => {
         doctorName: selectedDoctor,
         appointmentDateTime,
         patientName,
-        patientPhone
+        patientPhone,
+        notes
       });
       
       setSuccess('Wizyta została pomyślnie zarezerwowana!');
@@ -100,6 +102,7 @@ const AppointmentBooking = () => {
       setSelectedTime(null);
       setPatientName('');
       setPatientPhone('');
+      setNotes('');
       
       // Odświeżenie dostępnych terminów
       const data = await fetchAvailableDates(selectedDoctor);
@@ -225,6 +228,16 @@ const AppointmentBooking = () => {
                 onChange={(e) => setPatientPhone(e.target.value)} 
                 required
                 placeholder="np. 123-456-789"
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="notes">Notatka dla lekarza:</label>
+              <textarea 
+                id="notes" 
+                value={notes} 
+                onChange={(e) => setNotes(e.target.value)} 
+                placeholder="Opisz swój problem lub przyczynę wizyty"
+                rows="3"
               />
             </div>
             <div style={{ marginTop: '25px', textAlign: 'center' }}>

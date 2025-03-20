@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import DoctorDashboard from './components/DoctorDashboard';
 import AppointmentBooking from './components/AppointmentBooking';
+import PatientHistory from './components/PatientHistory';
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -24,10 +25,18 @@ function App() {
           >
             Zarezerwuj Wizytę
           </button>
+          <button 
+            className={`header-button ${activeTab === 'history' ? 'active' : ''}`}
+            onClick={() => setActiveTab('history')}
+          >
+            Historia Pacjenta
+          </button>
         </div>
       </div>
 
-      {activeTab === 'dashboard' ? <DoctorDashboard /> : <AppointmentBooking />}
+      {activeTab === 'dashboard' ? <DoctorDashboard /> : 
+       activeTab === 'booking' ? <AppointmentBooking /> :
+       <PatientHistory />}
     </div>
   );
 }

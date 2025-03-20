@@ -7,4 +7,6 @@ public class Appointment
     public DateTime AppointmentDateTime { get; set; }
     public string PatientName { get; set; } = string.Empty;
     public string PatientPhone { get; set; } = string.Empty;
+    public Guid PatientId { get; set; }
+    public string Notes { get; set; } = string.Empty;
 }

@@ -1,4 +1,4 @@
-const API_URL = 'https://fabresapi.twarog.eu/api';
+const API_URL = 'http://localhost:5000/api';
 
 export const fetchDentists = async () => {
   const response = await fetch(`${API_URL}/dentists`);
@@ -56,6 +56,73 @@ export const fetchAppointmentsByDoctorAndDate = async (doctorName, date) => {
   const response = await fetch(`${API_URL}/appointments/${doctorName}/${formattedDate}`);
   if (!response.ok) {
     throw new Error('Failed to fetch appointments');
+  }
+  return response.json();
+};
+
+// Patient related API calls
+export const fetchPatients = async () => {
+  const response = await fetch(`${API_URL}/patients`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch patients');
+  }
+  return response.json();
+};
+
+export const fetchPatientById = async (patientId) => {
+  const response = await fetch(`${API_URL}/patients/${patientId}`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch patient');
+  }
+  return response.json();
+};
+
+export const fetchPatientByPhone = async (phone) => {
+  const response = await fetch(`${API_URL}/patients/phone/${phone}`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch patient by phone');
+  }
+  return response.json();
+};
+
+export const createPatient = async (patientData) => {
+  const response = await fetch(`${API_URL}/patients`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(patientData),
+  });
+  
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData || 'Failed to create patient');
+  }
+  
+  return response.json();
+};
+
+export const updatePatient = async (patientId, patientData) => {
+  const response = await fetch(`${API_URL}/patients/${patientId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(patientData),
+  });
+  
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData || 'Failed to update patient');
+  }
+  
+  return response.ok;
+};
+
+export const fetchPatientAppointments = async (patientId) => {
+  const response = await fetch(`${API_URL}/patients/${patientId}/appointments`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch patient appointments');
   }
   return response.json();
 };

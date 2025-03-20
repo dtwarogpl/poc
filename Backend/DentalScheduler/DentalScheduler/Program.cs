@@ -19,8 +19,9 @@ builder.Services.AddCors(options =>
         });
 });
 
-// Register the appointment store as a singleton
+// Register the stores as singletons
 builder.Services.AddSingleton<AppointmentStore>();
+builder.Services.AddSingleton<PatientStore>();
 
 var app = builder.Build();
 
@@ -141,6 +142,100 @@ app.MapGet("/api/appointments/{doctorName}/{date}", (string doctorName, DateTime
     return Results.Ok(appointments);
 })
 .WithName("GetAppointmentsByDoctorAndDate")
+.WithOpenApi();
+
+// Patient endpoints
+app.MapGet("/api/patients", (PatientStore store) =>
+{
+    var patients = store.GetAllPatients();
+    return Results.Ok(patients);
+})
+.WithName("GetAllPatients")
+.WithOpenApi();
+
+app.MapGet("/api/patients/{id}", (Guid id, PatientStore store) =>
+{
+    var patient = store.GetPatientById(id);
+    if (patient == null)
+    {
+        return Results.NotFound($"Patient with ID {id} not found");
+    }
+    return Results.Ok(patient);
+})
+.WithName("GetPatientById")
+.WithOpenApi();
+
+app.MapGet("/api/patients/phone/{phone}", (string phone, PatientStore store) =>
+{
+    var patient = store.GetPatientByPhone(phone);
+    if (patient == null)
+    {
+        return Results.NotFound($"Patient with phone {phone} not found");
+    }
+    return Results.Ok(patient);
+})
+.WithName("GetPatientByPhone")
+.WithOpenApi();
+
+app.MapPost("/api/patients", (Patient patient, PatientStore store) =>
+{
+    if (string.IsNullOrWhiteSpace(patient.Name) || string.IsNullOrWhiteSpace(patient.Phone))
+    {
+        return Results.BadRequest("Patient name and phone are required");
+    }
+    
+    // Check if patient with this phone already exists
+    var existingPatient = store.GetPatientByPhone(patient.Phone);
+    if (existingPatient != null)
+    {
+        return Results.BadRequest($"Patient with phone {patient.Phone} already exists");
+    }
+    
+    var savedPatient = store.AddPatient(patient);
+    return Results.Created($"/api/patients/{savedPatient.PatientId}", savedPatient);
+})
+.WithName("CreatePatient")
+.WithOpenApi();
+
+app.MapPut("/api/patients/{id}", (Guid id, Patient patient, PatientStore store) =>
+{
+    if (id != patient.PatientId)
+    {
+        return Results.BadRequest("ID in URL does not match ID in request body");
+    }
+    
+    var existingPatient = store.GetPatientById(id);
+    if (existingPatient == null)
+    {
+        return Results.NotFound($"Patient with ID {id} not found");
+    }
+    
+    if (store.UpdatePatient(patient))
+    {
+        return Results.NoContent();
+    }
+    
+    return Results.Problem("Failed to update patient");
+})
+.WithName("UpdatePatient")
+.WithOpenApi();
+
+app.MapGet("/api/patients/{id}/appointments", (Guid id, PatientStore patientStore, AppointmentStore appointmentStore) =>
+{
+    var patient = patientStore.GetPatientById(id);
+    if (patient == null)
+    {
+        return Results.NotFound($"Patient with ID {id} not found");
+    }
+    
+    var appointments = patient.AppointmentIds
+        .Select(appointmentId => appointmentStore.GetById(appointmentId))
+        .Where(a => a != null)
+        .OrderByDescending(a => a!.AppointmentDateTime);
+    
+    return Results.Ok(appointments);
+})
+.WithName("GetPatientAppointments")
 .WithOpenApi();
 
 app.Run();

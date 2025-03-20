@@ -6,13 +6,16 @@ namespace DentalScheduler.Data;
 public class AppointmentStore
 {
     private readonly ConcurrentDictionary<Guid, Appointment> _appointments = new();
+    private readonly PatientStore? _patientStore;
 
     // Lista dentystów dla POC
     public static readonly string[] Dentists = { "Dr. Kowalski", "Dr. Nowak", "Dr. Wiśniewski" };
-
+    
     // Inicjalizacja przykładowymi danymi
-    public AppointmentStore()
+    public AppointmentStore(PatientStore? patientStore = null)
     {
+        _patientStore = patientStore;
+        
         // Dodanie kilku przykładowych wizyt
         var today = DateTime.Today;
         
@@ -21,7 +24,8 @@ public class AppointmentStore
             DoctorName = "Dr. Kowalski",
             AppointmentDateTime = today.AddDays(1).AddHours(9), // Jutro o 9:00
             PatientName = "Jan Kowalski",
-            PatientPhone = "555-123-4567"
+            PatientPhone = "555-123-4567",
+            Notes = "Regular check-up"
         });
         
         AddAppointment(new Appointment
@@ -29,7 +33,8 @@ public class AppointmentStore
             DoctorName = "Dr. Nowak",
             AppointmentDateTime = today.AddDays(1).AddHours(10), // Jutro o 10:00
             PatientName = "Anna Nowak",
-            PatientPhone = "555-987-6543"
+            PatientPhone = "555-987-6543",
+            Notes = "Tooth pain in lower left molar"
         });
     }
     
@@ -87,6 +92,36 @@ public class AppointmentStore
         if (!IsTimeSlotAvailable(appointment.DoctorName, appointment.AppointmentDateTime))
         {
             throw new InvalidOperationException("This time slot is not available.");
+        }
+        
+        // Link to existing patient if phone number matches
+        if (_patientStore != null)
+        {
+            var existingPatient = _patientStore.GetPatientByPhone(appointment.PatientPhone);
+            
+            if (existingPatient != null)
+            {
+                // Use existing patient's ID
+                appointment.PatientId = existingPatient.PatientId;
+                
+                // Add appointment ID to patient's appointment list
+                _patientStore.AddAppointmentToPatient(existingPatient.PatientId, appointment.AppointmentId);
+            }
+            else
+            {
+                // Create a new patient
+                var newPatient = new Patient
+                {
+                    Name = appointment.PatientName,
+                    Phone = appointment.PatientPhone
+                };
+                
+                var savedPatient = _patientStore.AddPatient(newPatient);
+                appointment.PatientId = savedPatient.PatientId;
+                
+                // Add appointment ID to patient's appointment list
+                _patientStore.AddAppointmentToPatient(savedPatient.PatientId, appointment.AppointmentId);
+            }
         }
         
         _appointments[appointment.AppointmentId] = appointment;
