@@ -32,6 +32,7 @@ if (app.Environment.IsDevelopment())
 }
 
 // app.UseHttpsRedirection();
+// Apply CORS before any other middleware
 app.UseCors();
 
 // List all dentists
