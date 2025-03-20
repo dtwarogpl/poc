@@ -1,0 +1,108 @@
+Detailed POC Description for Dental Appointment Scheduling Service (With In-Memory Storage)
+
+Overview
+This document outlines the requirements for an extremely simplified proof of concept (POC) dental appointment scheduling service using in-memory storage without a database.
+
+System Architecture
+
+Backend (.NET 9, C#)
+
+API Project: ASP.NET Core Web API
+Data Storage: In-memory collection (List or Dictionary)
+Project Structure: Minimal controllers with direct data access
+Frontend (React)
+
+UI Framework: React with hooks
+State Management: Simple React state hooks
+UI Components: Basic components for displaying appointments
+Data Model
+
+Appointment Class
+
+AppointmentId (Guid)
+DoctorName (string)
+AppointmentDateTime (DateTime)
+PatientName (string)
+PatientPhone (string)
+Business Rules
+
+All dentists are available from 8:00 to 16:00 (8 AM to 4 PM)
+Appointments can only be scheduled at the start of each hour (8:00, 9:00, etc.)
+Each appointment lasts exactly one hour
+No appointments on weekends
+Backend API Endpoints
+
+Get Available Appointment Dates
+Endpoint: GET /api/appointments/available/{doctorName}
+Description: Returns the three first available appointment days with open time slots
+Response: List of available dates with hourly slots (8:00, 9:00, etc.)
+Implementation: Calculate available slots based on in-memory appointments list
+Check Appointment Date Availability
+Endpoint: GET /api/appointments/check/{doctorName}/{dateTime}
+Description: Checks if a specific date and hour is available for booking
+Response: Boolean indicating availability
+Implementation: Check against in-memory appointments collection
+Check Alternative Dates
+Endpoint: GET /api/appointments/alternatives/{doctorName}/{dateTime}
+Description: Returns available dates/times near the provided one (±3 days)
+Response: List of alternative available dates and hourly slots
+Implementation: Find available slots within a 7-day window in memory
+Save Appointment
+Endpoint: POST /api/appointments
+Description: Saves a new appointment to in-memory storage
+Request Body: Doctor name, appointment date/time, patient name, patient phone
+Response: Created appointment details
+Implementation: Add to in-memory collection after checking availability
+In-Memory Storage Implementation
+
+Create a static AppointmentStore class or use dependency injection with singleton lifetime
+Use List<Appointment> or ConcurrentDictionary<Guid, Appointment> for thread safety
+Initialize with sample data if needed for demos
+Frontend Components
+
+Doctor Dashboard
+Component: DoctorDashboard
+Purpose: Display scheduled appointments for a selected doctor
+Features:
+Doctor selector (dropdown with hardcoded options)
+Date selector (date picker)
+Daily schedule view showing booked appointments
+Appointment List
+Component: AppointmentList
+Purpose: Display appointments for selected doctor and date
+Features:
+Simple list of appointments
+Time, patient name, and phone for each appointment
+Implementation Approach
+
+Phase 1: Backend Implementation
+
+Create ASP.NET Core Web API project
+Implement Appointment class
+Create in-memory storage class (static or singleton)
+Develop API endpoints using minimal API syntax
+Implement business logic for scheduling directly in controllers or minimal service classes
+Phase 2: Frontend Implementation
+
+Create React application
+Implement simple API service with fetch
+Create dashboard component
+Implement daily view showing appointments
+Add basic styling for readability
+Technical Considerations
+
+Use minimal API endpoints in .NET 9 for maximum simplicity
+Data is not persistent across application restarts
+No concurrency or conflicts handling (fine for single-user POC)
+Hardcode a list of dentists for the dropdown
+Limitations
+
+No authentication/authorization
+No data persistence
+Fixed business hours for all dentists
+Fixed appointment duration (1 hour)
+No weekend appointments
+No formal testing
+Data is lost when the application restarts
+Not suitable for multi-user scenarios (potential race conditions)
+This ultra-simplified approach allows for rapid development of a working POC while demonstrating the core scheduling capabilities with minimal overhead.
