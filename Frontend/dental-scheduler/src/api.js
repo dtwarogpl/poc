@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:5000/api';
+const API_URL = 'https://fabresapi.twarog.eu/api';
 
 export const fetchDentists = async () => {
   const response = await fetch(`${API_URL}/dentists`);
