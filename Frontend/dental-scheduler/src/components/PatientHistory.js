@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { fetchPatientByPhone, fetchPatientAppointments } from '../api';
+import { fetchPatientByPhone, fetchPatientAppointments, fetchPatientNoteByPhone, updatePatient } from '../api';
 
 const PatientHistory = () => {
   const [patientPhone, setPatientPhone] = useState('');
@@ -7,6 +7,8 @@ const PatientHistory = () => {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [doctorNote, setDoctorNote] = useState('');
+  const [isEditingNote, setIsEditingNote] = useState(false);
 
   const searchPatient = async (e) => {
     e.preventDefault();
@@ -24,6 +26,7 @@ const PatientHistory = () => {
     try {
       const patientData = await fetchPatientByPhone(patientPhone);
       setPatient(patientData);
+      setDoctorNote(patientData.doctorNote || '');
       
       const appointmentsData = await fetchPatientAppointments(patientData.patientId);
       setAppointments(appointmentsData);
@@ -71,6 +74,57 @@ const PatientHistory = () => {
             {patient.email && <p><strong>Email:</strong> {patient.email}</p>}
             {patient.dateOfBirth && <p><strong>Data urodzenia:</strong> {new Date(patient.dateOfBirth).toLocaleDateString()}</p>}
             {patient.address && <p><strong>Adres:</strong> {patient.address}</p>}
+            
+            <div style={{ marginTop: '20px' }}>
+              <strong>Notatka lekarza:</strong>
+              {isEditingNote ? (
+                <div style={{ marginTop: '10px' }}>
+                  <textarea
+                    value={doctorNote}
+                    onChange={(e) => setDoctorNote(e.target.value)}
+                    rows={4}
+                    style={{ width: '100%', padding: '8px' }}
+                  />
+                  <div style={{ marginTop: '10px', display: 'flex', gap: '10px' }}>
+                    <button 
+                      onClick={async () => {
+                        try {
+                          const updatedPatient = {...patient, doctorNote};
+                          await updatePatient(patient.patientId, updatedPatient);
+                          setIsEditingNote(false);
+                          setPatient(updatedPatient);
+                        } catch (err) {
+                          setError('Nie udało się zapisać notatki');
+                          console.error(err);
+                        }
+                      }}
+                    >
+                      Zapisz
+                    </button>
+                    <button 
+                      onClick={() => {
+                        setDoctorNote(patient.doctorNote || '');
+                        setIsEditingNote(false);
+                      }}
+                    >
+                      Anuluj
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column' }}>
+                  <p style={{ minHeight: '60px', background: '#f9f9f9', padding: '10px', borderRadius: '5px' }}>
+                    {patient.doctorNote || 'Brak notatki'}
+                  </p>
+                  <button 
+                    onClick={() => setIsEditingNote(true)}
+                    style={{ alignSelf: 'flex-start', marginTop: '10px' }}
+                  >
+                    Edytuj notatkę
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}

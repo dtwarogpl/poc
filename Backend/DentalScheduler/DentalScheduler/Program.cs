@@ -238,4 +238,16 @@ app.MapGet("/api/patients/{id}/appointments", (Guid id, PatientStore patientStor
 .WithName("GetPatientAppointments")
 .WithOpenApi();
 
+app.MapGet("/api/patients/note/{phone}", (string phone, PatientStore store) =>
+{
+    var patient = store.GetPatientByPhone(phone);
+    if (patient == null)
+    {
+        return Results.NotFound($"Patient with phone {phone} not found");
+    }
+    return Results.Ok(new { DoctorNote = patient.DoctorNote });
+})
+.WithName("GetPatientNoteByPhone")
+.WithOpenApi();
+
 app.Run();

@@ -8,5 +8,6 @@ public class Patient
     public string Email { get; set; } = string.Empty;
     public DateTime DateOfBirth { get; set; }
     public string Address { get; set; } = string.Empty;
+    public string DoctorNote { get; set; } = string.Empty;
     public List<Guid> AppointmentIds { get; set; } = new List<Guid>();
 }

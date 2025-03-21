@@ -126,3 +126,11 @@ export const fetchPatientAppointments = async (patientId) => {
   }
   return response.json();
 };
+
+export const fetchPatientNoteByPhone = async (phone) => {
+  const response = await fetch(`${API_URL}/patients/note/${phone}`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch patient note');
+  }
+  return response.json();
+};
